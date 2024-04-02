@@ -38,9 +38,10 @@ void GoToXY(short x, short y)
 void draw(int a, int b)
 {  
     int run_time = 0;
+    m.lock();
     // запускаем счётчик времени
     auto start1 = std::chrono::steady_clock::now();
-    std::cout << "    " << a << "      " << std::this_thread::get_id() << std::endl;
+    std::cout << "    " << a << "   " << std::this_thread::get_id() << std::endl;
     a = a + 2;
     int sleep_time1 = 500;
     std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time1));
@@ -48,11 +49,9 @@ void draw(int a, int b)
     for (int i = 0; i < b; ++i) {           
         sleep_time2 = std::rand() % 1000;
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time2));
-        m.lock();
         int x = 18 + i;
         GoToXY(x, a);
-        std::cout << "*";
-        m.unlock();
+        std::cout << (char)219;
     }
     // замеряем время завершения работы
     auto finish1 = std::chrono::steady_clock::now();
@@ -61,25 +60,25 @@ void draw(int a, int b)
     // кладём время переменную
     run_time = diff1.count();
     std::cout << "       " << run_time << " ms" << std::endl;
-        
+    m.unlock();
 }
 
 int main()
 {
-    setlocale(LC_ALL, "ru");
+    //setlocale(LC_ALL, "ru");
     int quantity_streams = 0;
     int length_calculations = 0;
     int* run_time_1_stream = new int[4];
 
-    std::cout << "Введите количество потоков " << std::endl;
+    std::cout << "Print quantity of streams " << std::endl;
    // std::cin >> quantity_streams;
     quantity_streams = 5;
  
-    std::cout << "Введите длину расчётов " << std::endl;
+    std::cout << "Print length of calculation " << std::endl;
     //std::cin >> length_calculations;
     length_calculations = 10;
 
-    std::cout << "Номер п/п  " << " id " << "   Прогресс-бар " << " Время работы, ms " << std::endl;
+    std::cout << "Number  " << " id " << "   Progress-bar " << "      time, ms " << std::endl;
 
     // создали коробку для потоков
     std::vector<std::thread> V;
@@ -100,6 +99,3 @@ int main()
     return 0;
 }
 
-// вопросы по заданию
-// какой символ использовать для того, чтобы полностью залить позицию символа?
-// как сделать так, чтобы потоки выводились в порядке номеров?
