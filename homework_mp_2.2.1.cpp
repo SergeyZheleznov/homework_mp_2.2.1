@@ -18,7 +18,6 @@
 #include <thread>
 #include <execution>
 #include <chrono>
-#include <vector>
 #include <windows.h>
 #include <mutex>
 #include <conio.h>
