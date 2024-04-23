@@ -28,73 +28,107 @@ using namespace std;
 
 HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-std::mutex m;
+std::mutex m1;
+std::mutex m2;
 
 void GoToXY(short x, short y)
 {
     SetConsoleCursorPosition(hStdOut, { x, y });
 }
 
-void draw(int a, int b)
-{  
+void draw0(int a)
+{
+    for (int i = 0; i < a; i++)
+    {
+        std::cout << i << std::endl;
+    }
+
+}
+
+void draw1(int a, int b)
+{   
+   
+    m1.lock();
+    short x = 7;
+    short y = a + 3;
+    GoToXY(x, y);
+    
+    std::cout << std::this_thread::get_id() << std::endl;
+    SetConsoleCursorPosition(hStdOut, { x, y });
+
+    x = 14;
+    y = 3;
+    
+    
+    m1.unlock();
+
+    int sleep_time0 = 1500;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time0));
     int run_time = 0;
-    m.lock();
-    // запускаем счётчик времени
+    a = a + 3;
     auto start1 = std::chrono::steady_clock::now();
-    std::cout << "    " << a << "   " << std::this_thread::get_id() << std::endl;
-    a = a + 2;
-    int sleep_time1 = 500;
-    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time1));
+    
     int sleep_time2 = 0;
-    for (int i = 0; i < b; ++i) {           
+    for (int i = 0; i < b; ++i) {
+        
         sleep_time2 = std::rand() % 1000;
         std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time2));
-        int x = 18 + i;
+        m2.lock();
+
+        x = 15 + i;
         GoToXY(x, a);
+        
         std::cout << (char)219;
+        m2.unlock();
     }
+
     // замеряем время завершения работы
     auto finish1 = std::chrono::steady_clock::now();
     // здесь время работы программы от начала до конца
     auto diff1 = std::chrono::duration_cast<std::chrono::milliseconds>(finish1 - start1);
     // кладём время переменную
     run_time = diff1.count();
-    std::cout << "       " << run_time << " ms" << std::endl;
-    m.unlock();
+
+    int sleep_time1 = 1500;
+    std::this_thread::sleep_for(std::chrono::milliseconds(sleep_time1));
+    x = 35;
+    y = a;
+    GoToXY(x, y);
+
+    std::cout << run_time << " ms" << std::endl;
+    x = 35;
+    y = a;
+    GoToXY(x, y);
 }
 
 int main()
 {
-    //setlocale(LC_ALL, "ru");
-    int quantity_streams = 0;
-    int length_calculations = 0;
+    int quantity_streams = 4;
+    int length_calculations = 10;
     int* run_time_1_stream = new int[4];
 
-    std::cout << "Print quantity of streams " << std::endl;
-   // std::cin >> quantity_streams;
-    quantity_streams = 5;
+    std::cout << "Print quantity of streams " << quantity_streams << std::endl;
  
-    std::cout << "Print length of calculation " << std::endl;
-    //std::cin >> length_calculations;
-    length_calculations = 10;
+    std::cout << "Print length of calculation " << length_calculations << std::endl;
 
     std::cout << "Number  " << " id " << "   Progress-bar " << "      time, ms " << std::endl;
 
-    // создали коробку для потоков
-    std::vector<std::thread> V;
+    draw0(quantity_streams);
 
-    // здесь мы заполнили эту коробку, напихав туда с помощью метода пуш бэк, то есть вдавив последовательно, причём сначала первый, потом второй и так далее.
-    //В скобках видно, что мы вкладываем потоки, и там функция и передаются значения переменных, всякий раз разные.
-        for (int i = 0; i < quantity_streams; ++i)
-        {
-            V.push_back(std::thread(draw, i + 1, length_calculations));
-        }
-
-    // здесь мы все потоки последовательно запускаем.
-    for (auto& el : V)
+    thread* t = new thread[quantity_streams];
+   
+    for (int i = 0; i < quantity_streams; i++)
     {
-        el.join();
+        t[i] = thread(draw1, i, length_calculations);
     }
+    for (int i = 0; i < quantity_streams; i++)
+    {
+        t[i].join();
+    }
+    int x = 10;
+    int y = 10;
+    GoToXY(x, y);
+
 
     return 0;
 }
